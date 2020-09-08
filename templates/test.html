@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load menu_tags %}
+
+{% block title %} Test Page {% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+	{% draw_menu 'technics' context %}
+</div>
+
+<div class="card">
+	{% draw_menu 'laptops' context %}
+</div>
+
+
+{% endblock %}

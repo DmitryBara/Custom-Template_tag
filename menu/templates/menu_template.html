@@ -1,0 +1,100 @@
+{% load static %}
+{% load context_tags %}
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<div  style="margin-bottom: 100px">
+
+  <div style="width: 200px; border: 1px solid; display: inline-block;">
+    <ul id="myUL">
+
+        {% define False as prev_level %}
+        {% define False as already_founded %}
+
+        <script > const menuId = [] </script>
+
+        {% for element in menu_elements %}
+
+          <!-- For js identification menu object -->
+          {% if not menu_id %}
+            {% define element.path|make_list|first as menu_id %}
+            <script > menuId.push("{{ menu_id }}") </script>
+          {% endif %}
+
+          <!-- Skip this block on first iteration -->
+          <!-- Should to close old opened lists <ul> <li> if we get out from category on few levels -->
+          <!-- Difference between levels will show how much time need to repeat </ul> </li> -->
+          {% define element.level|res:prev_level as difference %}
+          {% if difference < 0 %}
+            <!-- Should to make differense positive and create range for iteration -->
+            {% define difference|mod as times %}
+            {% for i in times|times %}
+                </ul>
+              </li>
+            {% endfor %}
+          {% endif %}
+
+          <!-- Draw new menu element (with caret or not) -->
+          <!-- <a href> need for jQuery -->
+          <!-- Setup class to open items by classname ex: element 1.2.1 will open 1 and 1.2 <li>-->
+          {% if element.is_parent %}
+            <li id="{{element.path}}">  
+              <span class="caret {{ menu_id }}"> {{ element.title }} </span>
+              <a href="{{element.get_url}}"></a>
+              <a href="{{element.title}}"></a>
+              <a href="{{element.path}}"></a>
+              <ul class="nested ">
+      
+          {% else %}
+            <li > 
+              <span> {{ element.title }} </span>
+              <a href="{{element.get_url}}"></a>
+              <a href="{{element.title}}"></a>
+              <a href="{{element.path}}"></a>
+            </li>
+            
+          {% endif %}
+
+          <!-- Here I set value of previous element level -->
+          {% define element.level as prev_level %}
+
+
+          <!-- This block help open some menu elements when url was given -->
+          {% if not already_founded %}
+            {% if context.url == element.get_url %}
+              <script > var curElementPath = "{{element.path}}" </script>
+              <script src="{% static 'js/menu_navigator_reload.js' %}" type="text/javascript"> </script>
+              {% define 1 as alreadys_founded %}
+            {% endif %}
+          {% endif %}
+
+        {% endfor %}
+
+    </ul>
+  </div>
+
+
+  <!-- Ajax content will replace default loaded page (this) -->
+    <div style="display: none; vertical-align: top;" class="ajaxContent"> 
+      {% if context.url %}
+        <p> Data came from backend by simple GET request </p>
+        {{ context.data }}
+      {% endif %}
+    </div>
+
+</div>
+
+
+<!-- Script to open only one <div> with content from ajax or 'GET' -->
+<!-- In future it's possible don't hide this blocks and make few ajax windows on one page -->
+<script>
+  toggler = document.getElementsByClassName("ajaxContent")
+  toggler[0].style.display = 'inline-block'
+</script>
+
+
+<script src="{% static 'js/ajax.js' %}"></script>
+<script src="{% static 'js/menu_navigator_worker.js' %}"></script>
+
+
